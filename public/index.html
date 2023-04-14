@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="style.css">
+	<title></title>
+</head>
+<body>
+
+
+	<form id="chat">
+		<div class="messages"></div>
+		<input type="text" name="name" placeholder="Nome">
+		<input type="text" name="message" placeholder="Mensagem">
+		<input type="submit" name="ok" value="Enviar">
+	</form>
+
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js" integrity="sha512-pumBsjNRGGqkPzKHndZMaAG+bir374sORyzM3uulLV14lN5LyykqNk8eEeUlUkB3U0M4FApyaHraT65ihJhDpQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js" integrity="sha512-xbQU0+iHqhVt7VIXi6vBJKPh3IQBF5B84sSHdjKiSccyX/1ZI7Vnkt2/8y8uruj63/DVmCxfUNohPNruthTEQA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+<script>
+	var socket = io('http://localhost:8080')
+
+	const renderMessage = (message) => {
+		$('.messages').append('<div class="message"><strong>' + message.name + ': </strong>' + message.message + '</div>'
+		)
+	}
+
+	socket.on('receivedMessage', (message) => {
+		renderMessage(message)
+	})
+
+	socket.on('previousMessages', (messages) => {
+		for (message of messages) {
+			renderMessage(message)
+		}
+	})
+
+
+	$('#chat').submit((event) => {
+		event.preventDefault()
+
+		var name = $('input[name=name]').val()
+		var message = $('input[name=message]').val()
+		if (name.length && message.length) {
+			var messageObject = {
+				name: name, 
+				message: message
+			}
+			renderMessage(messageObject)
+			socket.emit('sendMessage', messageObject)
+		}
+	})
+</script>
+
+</body>
+</html>
